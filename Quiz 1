@@ -1,0 +1,165 @@
+import time
+import sys
+import random
+
+
+class Question:
+    def __init__(self, prompt, answer, style):
+        self.prompt = prompt
+        self.answer = answer
+        self.style = style
+
+
+question_prompts = [
+    "What is the capital of France?\n(1) Paris\n(2) London\n(3) Berlin\n\n",
+    "Which planet is known as the Red Planet?\n(1) Mars\n(2) Jupiter\n(3) Saturn\n\n",
+    "What is the largest mammal in the world?\n(1) Elephant\n(2) Giraffe\n(3) Blue whale\n\n",
+    "Who painted the Mona Lisa?\n(1) Leonardo da Vinci\n(2) Pablo Picasso\n(3) Vincent van Gogh\n\n",
+    "What is the currency of Japan?\n(1) Yen\n(2) Euro\n(3) Rupee\n\n",
+    "What is the tallest mountain in the world?\n(1) Mount Kilimanjaro\n(2) Mount Everest\n(3) Mount McKinley\n\n",
+    "Which country is known as the 'Land of the Rising Sun'?\n(1) China\n(2) Japan\n(3) South Korea\n\n",
+    "True or False: The Nile River is the longest river in the world.\n\n",
+    "Fill in the blank: The Great Barrier _____ is located in Australia.\n\n",
+    "What is the official language of Brazil?\n(1) Portuguese\n(2) Spanish\n(3) English\n\n"
+]
+
+questions = [
+    Question(question_prompts[0], "1", "multiple-choice"),
+    Question(question_prompts[1], "1", "multiple-choice"),
+    Question(question_prompts[2], "3", "multiple-choice"),
+    Question(question_prompts[3], "1", "multiple-choice"),
+    Question(question_prompts[4], "1", "multiple-choice"),
+    Question(question_prompts[5], "2", "multiple-choice"),
+    Question(question_prompts[6], "2", "multiple-choice"),
+    Question(question_prompts[7], "True", "true-false"),
+    Question(question_prompts[8], "Reef", "fill-in-blank"),
+    Question(question_prompts[9], "1", "multiple-choice")
+]
+
+
+def get_high_score():
+    high_score = 0
+
+    try:
+        high_score_file = open("high_score.txt", "r")
+        high_score = int(high_score_file.read())
+        high_score_file.close()
+        print("The high score is", high_score)
+    except IOError:
+        print("There is no high score yet.")
+    except ValueError:
+        print("I'm confused. Starting with no high score.")
+
+    main()
+
+
+def save_high_score(new_high_score):
+    try:
+        high_score_file = open("high_score.txt", "w")
+        high_score_file.write(str(new_high_score))
+        high_score_file.close()
+    except IOError:
+        print("Unable to save the high score.")
+
+
+def greet():
+    print("\n************Welcome to the Ultimate Geography Quiz**************\n")
+
+
+greet()
+
+
+def main():
+    print("\n")
+
+    choice = input("""
+                      A: Play
+                      B: Check Highscore
+                      Q: Quit
+
+                      Please enter your choice: """)
+
+    if choice.lower() == "a":
+        print("\n")
+        run_quiz(questions)
+    elif choice.lower() == "b":
+        print("\n")
+        get_high_score()
+    elif choice.lower() == "q":
+        sys.exit()
+    else:
+        print("You must only select either A or B")
+        print("Please try again")
+
+
+def run_quiz(questions):
+    random.shuffle(questions)
+    score = 0
+    total_questions = len(questions)
+    reaction_times = []  # Store the reaction times for each question
+
+    for question in questions:
+        print(question.prompt)
+
+        start_time = time.time()  # Record the start time before the question is presented
+
+        if question.style == "multiple-choice":
+            answer = input("Your answer: ")
+        elif question.style == "true-false":
+            answer = input("True or False? ")
+        elif question.style == "fill-in-blank":
+            answer = input("Your answer: ")
+
+        end_time = time.time()  # Record the end time after the user gives the answer
+        reaction_time = end_time - start_time
+
+        reaction_times.append(reaction_time)
+
+        if answer.lower() == question.answer.lower():
+            print("\033[92mCorrect!\033[0m\n")  # Change the text color to green (ANSI escape code: \033[92m)
+            score += 100
+            print("Your current score is:", score)
+            print("\n")
+        else:
+            print("\033[91mIncorrect!\033[0m\n")  # Change the text color to red (ANSI escape code: \033[91m)
+            print("Your current score is:", score)
+            print("\n")
+
+        time.sleep(1)
+
+    print("Your final score is:", score)
+
+    total_reaction_time = sum(reaction_times)
+    average_reaction_time = total_reaction_time / total_questions
+
+    print("Total time taken:", round(total_reaction_time, 2), "seconds")
+    print("Average reaction time:", round(average_reaction_time, 2), "seconds")
+
+    high_score = get_high_score()
+
+    if score > high_score:
+        print("Yea! New high score!")
+        save_high_score(score)
+    else:
+        print("Better luck next time.")
+
+    play()
+
+
+def play():
+    play = input("Do you want to play again? (y/n): ")
+    print("\n")
+    if play.lower() == "y":
+        main()
+    elif play.lower() == "n":
+        print("Thanks for playing :)")
+        print("\n")
+        print("Ultimate Geography Quiz - Made by Jordan")
+        sys.exit()
+    else:
+        print("\n")
+        print("Something went wrong, closing script")
+        sys.exit()
+
+
+main()

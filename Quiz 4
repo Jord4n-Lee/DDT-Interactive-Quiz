@@ -1,0 +1,444 @@
+import time
+import os
+import sys
+import random
+from tqdm import tqdm
+
+
+class Question:
+    def __init__(self, prompt, answer, style):
+        self.prompt = prompt
+        self.answer = answer
+        self.style = style
+
+
+question_prompts = [
+    "What is the capital city of France?\n(1) Paris\n(2) Marseille\n(3) Lyon\n(4) Bordeaux\n\n",
+    "Which river is the longest in the world?\n(1) Nile River\n(2) Amazon River\n(3) Yangtze River\n(4) Mississippi River\n\n",
+    "Mount Everest, the highest peak in the world, is located in which mountain range?\n(1) Andes\n(2) Rocky Mountains\n(3) Himalayas\n(4) Alps\n\n",
+    "Which desert is known as the largest hot desert in the world?\n(1) Sahara Desert\n(2) Gobi Desert\n(3) Arabian Desert\n(4) Kalahari Desert\n\n",
+    "The Great Barrier Reef, one of the world's most famous coral reefs, is located off the coast of which country?\n(1) Australia\n(2) Brazil\n(3) Indonesia\n(4) Mexico\n\n",
+    "What is the largest country in South America by land area?\n(1) Brazil\n(2) Argentina\n(3) Colombia\n(4) Peru\n\n",
+    "What is the capital city of Japan?\n(1) Tokyo\n(2) Kyoto\n(3) Osaka\n(4) Seoul\n\n",
+    "Which African country is known as the 'Land of a Thousand Hills'?\n(1) Rwanda\n(2) Kenya\n(3) Nigeria\n(4) South Africa\n\n",
+    "Which of the following countries does NOT share a border with Russia?\n(1) China\n(2) Finland\n(3) Kazakhstan\n(4) Ukraine\n\n",
+    "The ancient city of Petra, famous for its rock-cut architecture, is located in which modern-day country?\n(1) Egypt\n(2) Greece\n(3) Jordan\n(4) Turkey\n\n",
+    "What is the currency of South Korea?\n(1) Won\n(2) Yen\n(3) Baht\n(4) United States Dollar\n\n",
+    "Which famous waterfall is located on the border of Zambia and Zimbabwe?\n(1) Angel Falls\n(2) Niagara Falls\n(3) Victoria Falls\n(4) Iguazu Falls\n\n",
+    "Which European country is known for its tulip fields and windmills?\n(1) France\n(2) Netherlands\n(3) Italy\n(4) Switzerland\n\n",
+    "Which river runs through the Grand Canyon in the United States?\n(1) Colorado River\n(2) Mississippi River\n(3) Missouri River\n(4) Rio Grande\n\n",
+    "The ancient city of Machu Picchu is located in which country?\n(1) Peru\n(2) Bolivia\n(3) Chile\n(4) Ecuador\n\n",
+    "Which African country is famous for its pyramids, similar to those in Egypt?\n(1) Sudan\n(2) Egypt\n(3) Mali\n(4) Nigeria\n\n",
+    "Which strait separates Africa from Europe?\n(1) Bering Strait\n(2) Gibraltar Strait\n(3) Malacca Strait\n(4) Magellan Strait\n\n",
+    "Which island nation is located in the Indian Ocean and is famous for its lemur population?\n(1) Seychelles\n(2) Maldives\n(3) Madagascar\n(4) Mauritius\n\n",
+    "In which country would you find the ancient city of Petra?\n(1) Jordan\n(2) Egypt\n(3) Lebanon\n(4) Iraq\n\n",
+    "Which mountain range stretches across seven countries in Southern Europe?\n(1) Rocky Mountains\n(2) Andes\n(3) Alps\n(4) Himalayas\n\n",
+    "The Nile River is the longest river in the world. (True/False)\n",
+    "The Great Wall of China is visible from space. (True/False)\n",
+    "The capital of Canada is Toronto. (True/False)\n",
+    "The Great Rift Valley is located primarily in North America. (True/False)\n",
+    "Lake Baikal is the deepest freshwater lake in the world. (True/False)\n",
+    "The Sahara Desert spans across several countries in Africa. (True/False)\n",
+    "The currency of China is __________. (Enter the currency name)\n",
+    "The highest mountain in Africa is Mount __________.\n",
+    "The __________ Ocean is the smallest and shallowest ocean in the world.\n",
+    "The __________ Canal connects the Atlantic Ocean to the Pacific Ocean.\n",
+    "The capital city of South Korea is __________.\n",
+    "The famous ancient wonder, the Colosseum, is located in the city of __________.\n"
+]
+
+questions = [
+    Question(question_prompts[0], "1", "multiple-choice"),
+    Question(question_prompts[1], "1", "multiple-choice"),
+    Question(question_prompts[2], "3", "multiple-choice"),
+    Question(question_prompts[3], "1", "multiple-choice"),
+    Question(question_prompts[4], "1", "multiple-choice"),
+    Question(question_prompts[5], "1", "multiple-choice"),
+    Question(question_prompts[6], "1", "multiple-choice"),
+    Question(question_prompts[7], "1", "multiple-choice"),
+    Question(question_prompts[8], "3", "multiple-choice"),
+    Question(question_prompts[9], "3", "multiple-choice"),
+    Question(question_prompts[10], "1", "multiple-choice"),
+    Question(question_prompts[11], "1", "multiple-choice"),
+    Question(question_prompts[12], "2", "multiple-choice"),
+    Question(question_prompts[13], "3", "multiple-choice"),
+    Question(question_prompts[14], "1", "multiple-choice"),
+    Question(question_prompts[15], "1", "multiple-choice"),
+    Question(question_prompts[16], "1", "multiple-choice"),
+    Question(question_prompts[17], "2", "multiple-choice"),
+    Question(question_prompts[18], "1", "multiple-choice"),
+    Question(question_prompts[19], "true", "true-false"),
+    Question(question_prompts[20], "false", "true-false"),
+    Question(question_prompts[21], "false", "true-false"),
+    Question(question_prompts[22], "false", "true-false"),
+    Question(question_prompts[23], "true", "true-false"),
+    Question(question_prompts[24], "true", "true-false"),
+    Question(question_prompts[25], "yuan", "fill-in-blank"),
+    Question(question_prompts[26], "kilimanjaro", "fill-in-blank"),
+    Question(question_prompts[27], "arctic", "fill-in-blank"),
+    Question(question_prompts[28], "panama", "fill-in-blank"),
+    Question(question_prompts[29], "seoul", "fill-in-blank"),
+    Question(question_prompts[30], "rome", "fill-in-blank"),
+]
+
+total_time_start = 0
+total_time_end = 0
+high_score = 0
+
+
+def flip_coin_for_multiplier():
+    time.sleep(1)
+    print("\n")
+    print("You did a coin flip for a score multiplier!")
+    coin_result = random.choice([0.5, 1.5])
+    print("\n")
+    print("Coin result:", coin_result)
+    return coin_result
+
+
+def get_high_score():
+    try:
+        with open("high_score.txt", "r") as high_score_file:
+            high_score = (high_score_file.read())
+        return high_score
+    except IOError:
+        print("There is no high score yet.")
+    except ValueError:
+        print("Invalid value in the high score file. Starting with no high score.")
+    return 0
+
+def save_high_score(new_high_score):
+    global high_score
+
+    try:
+        high_score_file = open("high_score.txt", "w")
+        high_score_file.write(new_high_score)
+        high_score_file.close()
+        high_score = new_high_score
+    except IOError:
+        print("Unable to save the high score.")
+
+
+def greet():
+    print("\n************Welcome to the Ultimate Geography Quiz**************\n")
+
+
+greet()
+
+
+def fake_loading(seconds):
+    for _ in range(seconds):
+        time.sleep(0.2)
+        print(".", end='', flush=True)
+
+def return_to_main_menu():
+    while True:
+        choice = input("Do you want to return to the main menu? (y/n): ").lower()
+        print("\n")
+
+        if choice == "y":
+            main()
+            break
+        elif choice == "n":
+            global total_time_end
+
+            total_time = total_time_end - total_time_start
+
+            print("Thanks for playing :)")
+            print("Total time taken to complete the quiz:", round(total_time, 2), "seconds")
+
+            print("\n")
+            print("Ultimate Geography Quiz - Made by Jordan")
+            sys.exit()
+        else:
+            print("Invalid input. Please enter 'y' to return to the main menu or 'n' to quit.")
+            continue
+
+def clear_terminal():
+    if os.name == 'posix':  # Linux and macOS
+        os.system('clear')
+    elif os.name == 'nt':  # Windows
+        os.system('cls')
+    else:
+        # For other platforms, print a bunch of newlines to "clear" the terminal
+        sys.stdout.write('\n' * 100)
+        sys.stdout.flush()
+
+def main():
+    global total_time_start
+    global total_time_end
+
+    total_time_start = time.time()  # Record the start time of the whole quiz
+
+    print("\n")
+
+    while True:
+        choice = input("""
+                          A: Play
+                          B: Check Highscore
+                          Q: Quit
+
+                          Please enter your choice: """)
+   
+        if choice.lower() == "a":
+            print("\n")
+            for i in tqdm(range(10), desc='LOADING'):
+                time.sleep(0.2)
+            print("\n")
+            time.sleep(2)
+            clear_terminal()
+            run_quiz(questions)
+        elif choice.lower() == "b":
+            print("\n")
+            time.sleep(1)
+            high_score = get_high_score()
+            print("High score:", high_score)
+            time.sleep(5)
+            clear_terminal()
+        elif choice.lower() == "q":
+            total_time_end = time.time()  # Record the end time of the whole quiz
+            sys.exit()
+        else:
+            print("You must only select either A or B or Q")
+            print("Please try again")
+
+def run_quiz(questions):
+    global total_time_end
+    global high_score
+
+    random.shuffle(questions)
+
+    # Select the first 10 questions from the shuffled list
+    selected_questions = questions[:10]
+
+    score = 0
+    total_questions = len(selected_questions)
+    reaction_times = []  # Store the reaction times for each question
+
+    # Determine the halfway point of the quiz
+    halfway_point = len(selected_questions) // 2
+
+    for i, question in enumerate(selected_questions):
+        # If we reach the halfway point, prompt for a coin flip
+        if i == halfway_point:
+            print("\n")
+            time.sleep(1)
+            print("You have reached the halfway point!")
+            time.sleep(1)
+            flip_choice = input("Do you want to flip a coin for a score multiplier? (y/n): ").lower()
+            if flip_choice == "y":
+                score_multiplier = flip_coin_for_multiplier()
+                score *= score_multiplier
+                time.sleep(1)
+                print("\n")
+                print(f"Your score has been multiplied by {score_multiplier}! Your current score is: {score}")
+                print("\n")
+
+        print(question.prompt)
+
+        start_time = time.time()  # Record the start time before the question is presented
+
+        if question.style == "multiple-choice":
+            answer = input("Your answer: ")
+        elif question.style == "true-false":
+            answer = input("True or False? ").lower()
+        elif question.style == "fill-in-blank":
+            answer = input("Your answer: ").lower()
+
+        end_time = time.time()  # Record the end time after the user gives the answer
+        reaction_time = end_time - start_time
+
+        reaction_times.append(reaction_time)
+
+        # For fill-in-the-blank questions
+        if question.style == "fill-in-blank":
+            if answer.lower() == question.answer.lower():
+                print("\033[92mCorrect!\033[0m\n")
+                score += 100
+                print("Your current score is:", score)
+                print("\n")
+            else:
+                print("\033[91mIncorrect!\033[0m\n")
+                print("Your current score is:", score)
+                print("\n")
+            time.sleep(1)
+        # For multiple-choice and true-false questions
+        else:
+            if answer.lower() == question.answer.lower():
+                print("\033[92mCorrect!\033[0m\n")
+                score += 100
+                print("Your current score is:", score)
+                print("\n")
+            else:
+                print("\033[91mIncorrect!\033[0m\n")
+                print("Your current score is:", score)
+                print("\n")
+            time.sleep(1)
+
+    time.sleep(1)
+    print("Your final score is:", score)
+
+    total_reaction_time = sum(reaction_times)
+    average_reaction_time = total_reaction_time / total_questions
+
+    time.sleep(1)
+    print("\nTotal time taken:", round(total_reaction_time, 2), "seconds")
+    time.sleep(1)
+    print("\nAverage reaction time:", round(average_reaction_time, 2), "seconds")
+    time.sleep(1)
+
+    total_time_end = time.time()  # Record the end time of the whole quiz
+
+    if score > high_score:
+        print("\n\033[93mYea! New high score!\033[0m")
+        save_high_score(score)
+    else:
+        print("\nBetter luck next time.")
+
+    play()
+
+
+def play():
+    global total_time_start
+
+    play_again = input("\nDo you want to play again? (y/n): ").lower()
+    print("\n")
+
+    if play_again == "y":
+        total_time_start = time.time()  # Reset the start time for a new game
+        main()
+    elif play_again == "n":
+        global total_time_end
+
+        total_time = total_time_end - total_time_start
+
+        print("Thanks for playing :)")
+        print("Total time taken to complete the quiz:", round(total_time, 2), "seconds")
+
+        print("\n")
+        print("Ultimate Geography Quiz - Made by Jordan")
+        sys.exit()
+    else:
+        print("Invalid input. Please enter 'y' to play again or 'n' to quit.")
+        play()
+
+
+def main():
+    global total_time_start
+    global total_time_end
+
+    total_time_start = time.time()  # Record the start time of the whole quiz
+
+    print("\n")
+
+    while True:
+        choice = input("""
+                          A: Play
+                          B: Check Highscore
+                          Q: Quit
+
+                          Please enter your choice: """)
+
+        if choice.lower() == "a":
+            print("\n")
+            for i in tqdm(range(10), desc='LOADING'):
+                time.sleep(0.2)
+            print("\n")
+            time.sleep(2)
+            clear_terminal()
+            run_quiz(questions)
+        elif choice.lower() == "b":
+            print("\n")
+            time.sleep(1)
+            high_score = get_high_score()
+            print("High score:", high_score)
+            time.sleep(5)
+            clear_terminal()
+        elif choice.lower() == "q":
+            total_time_end = time.time()  # Record the end time of the whole quiz
+            sys.exit()
+        else:
+            print("You must only select either A or B or Q")
+            print("Please try again")
+
+
+def flip_coin_for_multiplier():
+    time.sleep(1)
+    print("\n")
+    print("You did a coin flip for a score multiplier!")
+    coin_result = random.choice([0.5, 1.5])
+    print("\n")
+    print("Coin result:", coin_result)
+    return coin_result
+
+
+def get_high_score():
+    try:
+        with open("high_score.txt", "r") as high_score_file:
+            high_score = int(high_score_file.read())
+        return high_score
+    except IOError:
+        print("There is no high score yet.")
+    except ValueError:
+        print("Invalid value in the high score file. Starting with no high score.")
+    return 0
+
+
+def save_high_score(new_high_score):
+    global high_score
+
+    try:
+        high_score_file = open("high_score.txt", "w")
+        high_score_file.write(str(new_high_score))
+        high_score_file.close()
+        high_score = new_high_score
+    except IOError:
+        print("Unable to save the high score.")
+
+
+def greet():
+    print("\n************Welcome to the Ultimate Geography Quiz**************\n")
+
+
+def fake_loading(seconds):
+    for _ in range(seconds):
+        time.sleep(0.2)
+        print(".", end='', flush=True)
+
+
+def return_to_main_menu():
+    while True:
+        choice = input("Do you want to return to the main menu? (y/n): ").lower()
+        print("\n")
+
+        if choice == "y":
+            main()
+            break
+        elif choice == "n":
+            global total_time_end
+
+            total_time = total_time_end - total_time_start
+
+            print("Thanks for playing :)")
+            print("Total time taken to complete the quiz:", round(total_time, 2), "seconds")
+
+            print("\n")
+            print("Ultimate Geography Quiz - Made by Jordan")
+            sys.exit()
+        else:
+            print("Invalid input. Please enter 'y' to return to the main menu or 'n' to quit.")
+            continue
+
+
+def clear_terminal():
+    if os.name == 'posix':  # Linux and macOS
+        os.system('clear')
+    elif os.name == 'nt':  # Windows
+        os.system('cls')
+    else:
+        # For other platforms, print a bunch of newlines to "clear" the terminal
+        sys.stdout.write('\n' * 100)
+        sys.stdout.flush()
+
+
+main()
